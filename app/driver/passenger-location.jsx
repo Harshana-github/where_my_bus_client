@@ -1,8 +1,15 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
+import UserHeader from "../../components/UserHeader";
 
 const { width, height } = Dimensions.get("window");
 
@@ -16,6 +23,7 @@ const PassengerLocation = () => {
 
   return (
     <View style={styles.container}>
+      <UserHeader />
       <MapView
         style={styles.map}
         initialRegion={{
@@ -28,7 +36,10 @@ const PassengerLocation = () => {
         {passengerMarkers.map((passenger) => (
           <Marker
             key={passenger.id}
-            coordinate={{ latitude: passenger.latitude, longitude: passenger.longitude }}
+            coordinate={{
+              latitude: passenger.latitude,
+              longitude: passenger.longitude,
+            }}
             title={`Passenger ${passenger.id}`}
           />
         ))}
@@ -46,13 +57,24 @@ const PassengerLocation = () => {
       <View style={styles.passengerInfo}>
         <Text style={styles.heading}>Passenger Locations</Text>
       </View>
-      
+
       <View style={styles.noBusContainer}>
         <Text style={styles.noBusText}>No Bus Displayed</Text>
       </View>
-      
-      <TouchableOpacity style={styles.homeButton} onPress={() => router.push("/")}> 
-        <Text style={styles.homeButtonText}><FontAwesome name="home" size={18} color="white" style={styles.icon} /> Home</Text>
+
+      <TouchableOpacity
+        style={styles.homeButton}
+        onPress={() => router.push("/")}
+      >
+        <Text style={styles.homeButtonText}>
+          <FontAwesome
+            name="home"
+            size={18}
+            color="white"
+            style={styles.icon}
+          />{" "}
+          Home
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -68,7 +90,7 @@ const styles = StyleSheet.create({
   },
   passengerInfo: {
     position: "absolute",
-    top: 50,
+    bottom: 100,
     alignSelf: "center",
     backgroundColor: "white",
     padding: 10,

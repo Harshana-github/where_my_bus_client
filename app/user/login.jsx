@@ -25,9 +25,16 @@ const Login = () => {
   const handleLogin = () => {
     dispatch(login({ email, password }))
       .unwrap()
-      .then(() => {
-        Alert.alert("Login Success");
-        router.push("/passenger/passenger-home");
+      .then((data) => {
+        const userType = data.user.user_type;
+        
+        if (userType === "passenger") {
+          Alert.alert("Login Success");
+          router.push("/passenger/passenger-home");
+        } else if (userType === "driver") {
+          Alert.alert("Login Success");
+          router.push("/driver/profile-update");
+        }
       })
       .catch((err) => {
         Alert.alert("Login Failed", err || "Unknown error");

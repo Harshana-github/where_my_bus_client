@@ -15,12 +15,18 @@ const Index = () => {
         await new Promise((resolve) => setTimeout(resolve, 10000));
 
         const userData = await AsyncStorage.getItem("WhereMyBus");
-
         if (userData) {
-          // User is logged in
-          router.replace("/passenger/passenger-home");
+          const parsed = JSON.parse(userData);
+          const userType = parsed.user.user_type;
+          if (userType === "passenger") {
+            router.replace("/passenger/passenger-home");
+          } else if (userType === "driver") {
+            router.replace("/driver/passenger-location");
+          } else if (userType === "admin") {
+            AsyncStorage.removeItem("WhereMyBus");
+            router.replace("/user/login");
+          }
         } else {
-          // User not logged in
           router.replace("/user/login");
         }
       } catch (error) {

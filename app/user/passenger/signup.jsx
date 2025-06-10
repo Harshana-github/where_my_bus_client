@@ -61,7 +61,9 @@ const PassengerSignup = () => {
       .unwrap()
       .then(() => {
         alert("Registration successful! 🎉");
-        router.replace("/passenger/passenger-home");
+        if (userType === "passenger") {
+          router.replace("/passenger/passenger-home");
+        }
       })
       .catch((err) => {
         alert(err);
