@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { useDispatch } from 'react-redux';
 import React from "react";
 import {
   View,
@@ -8,11 +9,22 @@ import {
   TouchableOpacity,
   Text,
 } from "react-native";
+import { setUserType } from "../../redux/userType/userTypeSlice";
 
 const { width, height } = Dimensions.get("window");
 
 const SignupType = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  const handleSelect = (type) => {
+    dispatch(setUserType(type));
+    if (type === "passenger") {
+      router.push("/user/passenger/signup");
+    } else {
+      router.push("/user/driver/signup");
+    }
+  };
   return (
     <View style={styles.container}>
       {/* Background Ellipses */}
@@ -54,14 +66,14 @@ const SignupType = () => {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push("/user/passenger/signup")}
+          onPress={() => handleSelect("passenger")}
         >
           <Text style={styles.buttonText}>Passenger</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push("/user/driver/signup")}
+          onPress={() => handleSelect("driver")}
         >
           <Text style={styles.buttonText}>Driver</Text>
         </TouchableOpacity>
