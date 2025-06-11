@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   Image,
@@ -10,33 +10,73 @@ import {
   TextInput,
 } from "react-native";
 import UserHeader from "../../components/UserHeader";
+import { useDispatch, useSelector } from "react-redux";
+import { submitDriver } from "../../redux/driver/driverThunk";
+import { clearTempData } from "../../redux/tempData/tempDataSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width, height } = Dimensions.get("window");
 
-const ProfileUpdate = () => {
+const ProfileComplete = () => {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const dispatch = useDispatch();
+  const driverData = useSelector((state) => state.tempData.driver);
+  const busData = useSelector((state) => state.tempData.bus);
+  const routeData = useSelector((state) => state.tempData.route);
+  const handleSubmit = () => {
+    if (!driverData) {
+      alert("No driver data to submit.");
+      return;
+    }
 
-  useEffect(() => {
-    const fetchUserId = async () => {
-      try {
-        const stored = await AsyncStorage.getItem("WhereMyBus");
-        console.log(stored)
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          const user = parsed?.user?.is_profile_completed;
-          setUser(user);
-        }
-      } catch (error) {
-        console.error("Error retrieving user ID:", error);
-      }
+    if (!busData) {
+      alert("No bus data to submit.");
+      return;
+    }
+
+    if (!routeData) {
+      alert("No route data to submit.");
+      return;
+    }
+
+    const driverProfileData = {
+      driver: driverData,
+      bus: busData,
+      route: routeData,
     };
 
-    fetchUserId();
-  }, []);
+    dispatch(submitDriver(driverProfileData))
+      .unwrap()
+      .then(async () => {
+        dispatch(clearTempData());
+        // ✅ Update AsyncStorage
+        try {
+          const stored = await AsyncStorage.getItem("WhereMyBus");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            const updatedUser = {
+              ...parsed.user,
+              is_profile_completed: 1,
+            };
+            await AsyncStorage.setItem(
+              "WhereMyBus",
+              JSON.stringify({
+                ...parsed,
+                user: updatedUser,
+              })
+            );
+          }
+        } catch (e) {
+          console.error("Failed to update user profile status:", e);
+        }
+        alert("Driver data submitted successfully!");
+        router.push("driver/passenger-location");
+      })
+      .catch((err) => {
+        alert("Failed to submit driver data: " + err);
+      });
+  };
 
-  console.log(user);
   return (
     <View style={styles.container}>
       <UserHeader />
@@ -76,20 +116,26 @@ const ProfileUpdate = () => {
 
       {/* White Rectangle (Login Form) */}
       <View style={styles.whiteBox}>
-        <Text style={styles.heading}>Please update your profile</Text>
+        <Text style={styles.heading}>
+          Are you sure save this all details as your profile?
+        </Text>
 
-        {/* Login Button */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("driver/details-update")}
-        >
-          <Text style={styles.buttonText}>Let's go</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backButtonText}>Back</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.nextButton} onPress={handleSubmit}>
+            <Text style={styles.nextButtonText}>Save</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -132,10 +178,10 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   heading: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#000",
-    marginBottom: 15,
+    marginBottom: 50,
   },
   label: {
     fontSize: 14,
@@ -182,6 +228,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
   },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  backButton: {
+    backgroundColor: "#CCCCCC",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    flex: 0.48,
+    alignItems: "center",
+  },
+  nextButton: {
+    backgroundColor: "#042D6C",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    flex: 0.48,
+    alignItems: "center",
+  },
+  backButtonText: {
+    color: "#000",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  nextButtonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
 });
 
-export default ProfileUpdate;
+export default ProfileComplete;

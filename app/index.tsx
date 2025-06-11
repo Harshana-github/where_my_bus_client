@@ -18,10 +18,15 @@ const Index = () => {
         if (userData) {
           const parsed = JSON.parse(userData);
           const userType = parsed.user.user_type;
+          const isProfileCompleted = parsed.user.is_profile_completed;
           if (userType === "passenger") {
             router.replace("/passenger/passenger-home");
           } else if (userType === "driver") {
-            router.replace("/driver/passenger-location");
+            if (isProfileCompleted === 1) {
+              router.replace("/driver/passenger-location");
+            } else {
+              router.push("/driver/profile-update");
+            }
           } else if (userType === "admin") {
             AsyncStorage.removeItem("WhereMyBus");
             router.replace("/user/login");

@@ -27,13 +27,18 @@ const Login = () => {
       .unwrap()
       .then((data) => {
         const userType = data.user.user_type;
-        
+        const isProfileCompleted = data.user.is_profile_completed;
+
         if (userType === "passenger") {
           Alert.alert("Login Success");
           router.push("/passenger/passenger-home");
         } else if (userType === "driver") {
           Alert.alert("Login Success");
-          router.push("/driver/profile-update");
+          if (isProfileCompleted === 1) {
+            router.push("/driver/passenger-location");
+          } else {
+            router.push("/driver/profile-update");
+          }
         }
       })
       .catch((err) => {
